@@ -1,8 +1,10 @@
-# OMEN Fan Control
+# OMEN Fan Control: HP OMEN fan control for Ubuntu and Linux
 
-A small GTK app for switching HP OMEN laptop fans between **Auto**, **Smart** and **Max** on Linux.
+A simple GUI to control the fans on **HP OMEN** (and possibly **HP Victus**) gaming laptops running **Ubuntu** or other Linux distros. Switch between **Auto**, **Smart** and **Max** fan modes, and watch CPU temperature and fan RPM live.
 
-![screenshot](docs/screenshot.png)
+It's a lightweight Linux alternative to the fan control in Windows' **OMEN Gaming Hub**.
+
+![OMEN Fan Control on Ubuntu: CPU temperature, CPU and GPU fan RPM, Auto / Smart / Max buttons](docs/screenshot.png)
 
 | Mode | What it does |
 |---|---|
@@ -10,43 +12,62 @@ A small GTK app for switching HP OMEN laptop fans between **Auto**, **Smart** an
 | **Smart** | Switches to Max once the CPU reaches the temperature you pick (55–95 °C), and back to Auto when it cools 8 °C below that. |
 | **Max** | Both fans at full speed. |
 
-It shows CPU temperature and both fan speeds, updated every 1.5 s. Closing the window puts the fans back to Auto, so they never stay stuck at full speed. Your last mode and threshold are saved in `~/.config/omen-fan/config.json`.
+Closing the window puts the fans back to Auto, so they never stay stuck at full speed.
 
-## Why no percentage slider?
+## Supported laptops
 
-The Linux `hp-wmi` driver only exposes `pwm1_enable` for these laptops, and it accepts just two values: `0` (max) and `2` (auto). Anything else is rejected with `Invalid argument`. Smart mode is a temperature-triggered boost built on top of those two states.
+| Laptop | Board ID | Distro | Kernel | Status |
+|---|---|---|---|---|
+| HP OMEN Slim Gaming Laptop 16t-an000 | 8D40 | Ubuntu 24.04 | 6.14 | ✅ Works |
 
-## Requirements
+**Have a different HP OMEN or Victus?** Run `./check-compat.sh` and [open a compatibility report](https://github.com/iam-shanmukha/omen-fan-control/issues/new?template=compatibility.yml), even if it doesn't work. Each report adds a row here, which helps the next person with the same laptop.
 
-- An HP OMEN or Victus laptop where the `hp_wmi` module provides a hwmon device named `hp` with `pwm1_enable`. Check with:
-  ```sh
-  grep -l '^hp$' /sys/class/hwmon/hwmon*/name
-  ```
-- Python 3.10+ with GTK 3 bindings (`python3-gi`, preinstalled on Ubuntu/GNOME).
+Your laptop probably works if `./check-compat.sh` prints `Result: SUPPORTED`.
 
-Tested on an OMEN Slim 16t-an000 (board 8D40), Ubuntu 24.04, kernel 6.14.
-
-## Install
+## Install on Ubuntu
 
 ```sh
 git clone https://github.com/iam-shanmukha/omen-fan-control.git
 cd omen-fan-control
+./check-compat.sh   # confirm your laptop is supported
 ./install.sh
 ```
 
-`install.sh` adds the udev rule `/etc/udev/rules.d/99-omen-fan.rules`, which lets members of the `sudo` group change the fan mode without a password prompt. It also adds an "OMEN Fan Control" entry to your app menu.
+Then open **OMEN Fan Control** from the app menu, or run `python3 omen_fan_gui.py`.
 
-Run it from the app menu, or with:
+`install.sh` adds the udev rule `/etc/udev/rules.d/99-omen-fan.rules`, which lets members of the `sudo` group change the fan mode without a password prompt, plus an app-menu entry.
+
+Requirements: Python 3.10+ with GTK 3 bindings (`python3-gi`, preinstalled on Ubuntu with GNOME) and the `hp_wmi` kernel module (loaded automatically on HP laptops).
+
+## FAQ
+
+### How do I set HP OMEN fans to max speed on Linux?
+
+Pick **Max** in the app. Under the hood this writes `0` to `pwm1_enable` on the `hp` hwmon device, which is the same thing as:
 
 ```sh
-python3 omen_fan_gui.py
+HP=$(dirname "$(grep -lx hp /sys/class/hwmon/hwmon*/name)")
+echo 0 | sudo tee "$HP/pwm1_enable"   # max
+echo 2 | sudo tee "$HP/pwm1_enable"   # auto
 ```
+
+### Why can't I set the fan speed to a percentage?
+
+The Linux `hp-wmi` driver only accepts two values for these laptops: `0` (max) and `2` (auto). Anything else returns `Invalid argument`. Smart mode is a temperature-triggered boost built on top of those two states.
+
+### My HP OMEN laptop overheats on Ubuntu. Will this help?
+
+Smart mode boosts the fans before the CPU gets too hot, without running them at full noise all the time. Set the threshold around 75–80 °C.
+
+### Does it work with NBFC?
+
+This app doesn't need NBFC or `fancontrol`. It uses the kernel's own `hp-wmi` driver.
 
 ## Uninstall
 
 ```sh
 sudo rm /etc/udev/rules.d/99-omen-fan.rules
-rm ~/.local/share/applications/omen-fan.desktop ~/.config/omen-fan -r
+rm -r ~/.local/share/applications/omen-fan.desktop ~/.config/omen-fan
 ```
 
 ## Tests

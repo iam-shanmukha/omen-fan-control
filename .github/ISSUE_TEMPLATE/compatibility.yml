@@ -1,0 +1,30 @@
+name: Compatibility report
+description: Tell us whether OMEN Fan Control works on your laptop
+title: "[Compat] <laptop model>"
+labels: ["compatibility"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks! Reports like this build the supported-models list so other owners can find out if their laptop works.
+  - type: textarea
+    id: check
+    attributes:
+      label: Output of ./check-compat.sh
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: works
+    attributes:
+      label: Does it work?
+      options:
+        - "Yes - Auto, Smart and Max all work"
+        - "Partly - see notes"
+        - "No"
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Anything odd, e.g. fans revert from Max on their own, wrong RPM, only one fan shown.
