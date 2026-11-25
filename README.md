@@ -14,6 +14,19 @@ It's a lightweight Linux alternative to the fan control in Windows' **OMEN Gamin
 
 Closing the window puts the fans back to Auto, so they never stay stuck at full speed.
 
+### Screenshots
+
+<table>
+  <tr>
+    <th>Auto</th><th>Smart</th><th>Max</th>
+  </tr>
+  <tr>
+    <td valign="top"><img src="docs/mode-auto.png" width="260" alt="Auto mode: firmware controls the fans"></td>
+    <td valign="top"><img src="docs/mode-smart.png" width="260" alt="Smart mode: boost-at temperature slider set to 80 °C"></td>
+    <td valign="top"><img src="docs/mode-max.png" width="260" alt="Max mode: both fans at full speed"></td>
+  </tr>
+</table>
+
 ## Supported laptops
 
 | Laptop | Board ID | Distro | Kernel | Status |

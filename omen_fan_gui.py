@@ -88,6 +88,8 @@ class FanWindow(Gtk.Window):
         root.pack_start(self._build_mode_box(), False, False, 0)
         self.status = label("", ("dim",))
         self.status.set_line_wrap(True)
+        self.status.set_max_width_chars(40)
+        self.status.set_no_show_all(True)  # only shown when there's an error
         root.pack_start(self.status, False, False, 0)
 
         self._select_mode(self.config["mode"])
@@ -145,6 +147,7 @@ class FanWindow(Gtk.Window):
         box.pack_start(switcher, False, False, 0)
         self.mode_hint = label("", ("dim",))
         self.mode_hint.set_line_wrap(True)
+        self.mode_hint.set_max_width_chars(40)  # wrap instead of widening the window
         box.pack_start(self.mode_hint, False, False, 0)
 
         self.smart_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
@@ -219,6 +222,7 @@ class FanWindow(Gtk.Window):
 
     def _set_status(self, text: str, error: bool = False) -> None:
         self.status.set_text(text)
+        self.status.set_visible(bool(text))
         ctx = self.status.get_style_context()
         (ctx.add_class if error else ctx.remove_class)("status-err")
 
